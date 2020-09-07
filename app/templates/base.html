@@ -1,6 +1,4 @@
-<!--
-    Modelo básico com barra de navegação
--->
+<!-- Modelo básico com barra de navegação -->
 <html>
     <head>
       {% if title %}
@@ -10,8 +8,21 @@
       {% endif %}
     </head>
     <body>
-        <div>Monitoramento: <a href="/index">Home</a></div>
+        <div>
+            Monitoramento: 
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        </div>
         <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </body>
 </html>

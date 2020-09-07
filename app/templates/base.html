@@ -1,0 +1,17 @@
+<!--
+    Modelo básico com barra de navegação
+-->
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Monitoramento</title>
+      {% else %}
+      <title>Welcome to Monitoramento</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Monitoramento: <a href="/index">Home</a></div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>

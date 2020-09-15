@@ -4,14 +4,8 @@ from flask import render_template, flash, redirect, url_for, request, json
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models.user_model import User, UserSchema
 from werkzeug.urls import url_parse
-from app.controllers import user_controller
-'''
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from app.controllers import user_controller, cam_controller, vehicle_controller
 
-engine = create_engine('sqlite:///app.db', echo=True)
-Session = sessionmaker(bind=engine)
-'''
 @app.route('/')
 @app.route('/index')
 @login_required

@@ -4,19 +4,19 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'user'
+class Cam(UserMixin, db.Model):
+    __tablename__ = 'cam'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
+    camname = db.Column(db.String(64), index=True, unique=True)
+    end = db.Column(db.String(120), index=True)
     password_hash = db.Column(db.String(128))
 
     def __repr__(self):
-        return '<Id: {}, User {}, Email: {}>'.format(self.id, self.username, self.email)
+        return '<Id: {}, Cam {}, End: {}>'.format(self.id, self.camname, self.end)
 
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
+    def __init__(self, camname, end, password):
+        self.camname = camname
+        self.end = end
         self.password_hash = self.set_password(password)
     
     def set_password(self, password):
@@ -26,14 +26,14 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 @login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+def load_cam(id):
+    return Cam.query.get(int(id))
 
-class UserSchema(SQLAlchemySchema):
+class CamSchema(SQLAlchemySchema):
     class Meta:
-        model = User
+        model = Cam
         load_instance = True
     
     id = auto_field()
-    username = auto_field()
-    email = auto_field()
+    camname = auto_field()
+    end = auto_field()

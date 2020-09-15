@@ -28,8 +28,8 @@ def get_user(user_id):
 def create_user():
     username = request.json['username']
     email = request.json['email']
-    senha = request.json['senha']
-    user = User(username, email, senha)
+    password = request.json['password']
+    user = User(username, email, password)
 
     db.session.add(user)
     db.session.commit()

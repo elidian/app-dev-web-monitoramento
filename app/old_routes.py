@@ -1,10 +1,11 @@
+'''
 from app import app, db
 from app.forms import LoginForm, RegistrationForm
 from flask import render_template, flash, redirect, url_for, request, json
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models.user_model import User, UserSchema
 from werkzeug.urls import url_parse
-from app.controllers import user_controller, cam_controller, vehicle_controller
+from app.controllers import user_controller, cam_controller, vehicle_controller, post_cam_controller, post_user_controller
 
 @app.route('/')
 @app.route('/index')
@@ -57,4 +58,4 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
-
+'''

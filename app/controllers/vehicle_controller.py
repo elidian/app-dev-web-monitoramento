@@ -6,7 +6,7 @@ from app.models.vehicle_model import Vehicle, VehicleSchema
 def index_vehicle():
     return jsonify("Hi Vehicle, Welcome to Monitoramento API in Flask!")
 
-@app.route('/api/v1/vehicle', methods=['GET'])
+@app.route('/api/v1/vehicles', methods=['GET'])
 def get_vehicles():
     vehicles = Vehicle.query.order_by(Vehicle.id.asc()).all()
     if not vehicles:
@@ -24,8 +24,38 @@ def get_vehicle(vehicle_id):
     vehicle_schema = VehicleSchema()
     return json.dumps(vehicle_schema.dump(vehicle)), 200
 
+''' json model
+    {
+        "placa": "",
+        "chassi": "",
+        "cpf_dono": "",
+        "queixa_roubo": "",
+        "licenciamento": "",
+        "exercicio": "",
+        "ipva": ""
+    }
+    '''
 @app.route('/api/v1/vehicle/new', methods=['POST'])
 def create_vehicle():
+    #'''
+    if not request.get_json():
+        return jsonify("Requisição incompleta (json)"), 400
+    
+    if not request.json['placa']:
+        return jsonify("Requisição incompleta (placa)"), 400
+    if not request.json['chassi']:
+        return jsonify("Requisição incompleta (chassi)"), 400
+    if not request.json['cpf_dono']:
+        return jsonify("Requisição incompleta (cfp_dono)"), 400
+    if not json.dumps(request.json['queixa_roubo']):
+        return jsonify("Requisição incompleta (queixa_roubo)"), 400
+    if not json.dumps(request.json['licenciamento']):
+        return jsonify("Requisição incompleta (licenciamento)"), 400
+    if not request.json['exercicio']:
+        return jsonify("Requisição incompleta (exercicio)"), 400
+    if not json.dumps(request.json['ipva']):
+        return jsonify("Requisição incompleta (ipva)"), 400
+    #'''
     placa = request.json['placa']
     chassi = request.json['chassi']
     cpf_dono = request.json['cpf_dono']
@@ -33,6 +63,7 @@ def create_vehicle():
     licenciamento = request.json['licenciamento']
     exercicio = request.json['exercicio']
     ipva = request.json['ipva']
+    
     vehicle = Vehicle(placa, chassi, cpf_dono, queixa_roubo, licenciamento, exercicio, ipva)
 
     db.session.add(vehicle)
@@ -83,4 +114,4 @@ def put_vehicle(vehicle_id):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error 404': 'Not found'}), 404)
+    return make_response(jsonify({'error': 'Not found (404)'}), 404)

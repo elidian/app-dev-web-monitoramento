@@ -24,6 +24,13 @@ def get_user(user_id):
     user_schema = UserSchema()
     return json.dumps(user_schema.dump(user)), 200
 
+''' json model
+    {
+        "username": "",
+        "email": "",
+        "password": ""
+    }
+    '''
 @app.route('/api/v1/user/new', methods=['POST'])
 def create_user():
     username = request.json['username']

@@ -1,9 +1,9 @@
-from app import app, db
-from app.models.vehicle_model import Vehicle, VehicleScham
+from app import db
+from app.models.vehicle_model import Vehicle, VehicleSchema
 from flask import jsonify
 
 class VehicleService:
-    @service
+    @staticmethod
     def get_vehicle_id(placa):
         if not Vehicle.check_is_placa(placa):
             return False

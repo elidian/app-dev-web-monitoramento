@@ -1,8 +1,9 @@
-from app import db
+from app import app, db
 from datetime import datetime
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 class Vehicle(db.Model):
+    __tablename__ = 'vehicle'
     id = db.Column(db.Integer, primary_key=True)
     placa = db.Column(db.String(7), index=True, unique=True)
     chassi = db.Column(db.String(17), index=True, unique=True)
@@ -13,21 +14,22 @@ class Vehicle(db.Model):
     ipva = db.Column(db.Boolean)
 
     def __repr__(self):
-        return '<Vehicle Placa: {}; Chassi: {}; Cpf registrado: {}; Queixa de ROUBO: {}; ipva: {}; Licenciamento: {}; Exercicio: {}>'.format(self.placa, self.chassi, self.cpf_dono, self.queixa_roubo, self.ipva, self.licenciamento, self.exercicio)
-
-    def __init__(self, placa, chassi, cpf, queixa_roubo, licenciamento, exercicio, ipva):
+        return '<id: {}, Vehicle Placa: {}; Chassi: {}; Cpf registrado: {}; Queixa de ROUBO: {}; Licenciamento: {}; Exercicio: {}; ipva: {}>'.format(self.id, self.placa, self.chassi, self.cpf_dono, self.queixa_roubo, self.licenciamento, self.exercicio, self.ipva)
+    
+    def __init__(self, placa, chassi, cpf_dono, queixa_roubo, licenciamento, exercicio, ipva):
         self.placa = placa
         self.chassi = chassi
-        self.cpf_dono = cpf
+        self.cpf_dono = cpf_dono
         self.queixa_roubo = queixa_roubo
         self.licenciamento = licenciamento
         self.exercicio = exercicio
         self.ipva = ipva
     
-    def check_is_placa(self, placa):
-        if placa is not None:
-            if (placa[0].isalpha() and placa[1].isalpha() and placa[2].isalpha() and placa[3].isdecimal() and (placa[4].isdecimal() or placa[4].isalpha()) and placa[5].isdecimal() and placa[6].isdecimal()) is False:
-                return False
+    def check_is_placa(placa):
+        if placa:
+            if (placa[0].isalpha() and placa[1].isalpha() and placa[2].isalpha() and placa[3].isdecimal() and (placa[4].isdecimal() or placa[4].isalpha()) and placa[5].isdecimal() and placa[6].isdecimal()):
+                return True    
+        return False
 
 class VehicleSchema(SQLAlchemySchema):
     class Meta:

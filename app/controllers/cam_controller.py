@@ -24,6 +24,13 @@ def get_cam(cam_id):
     cam_schema = CamSchema()
     return json.dumps(cam_schema.dump(cam)), 200
 
+''' json model
+    {
+        "camname": "",
+        "end": "",
+        "password": ""
+    }
+    '''
 @app.route('/api/v1/cam/new', methods=['POST'])
 def create_cam():
     camname = request.json['camname']

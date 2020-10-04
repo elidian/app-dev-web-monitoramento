@@ -1,7 +1,6 @@
 from flask import Flask, json, jsonify, make_response, request, abort
-from app import app, db
-from app.models.post_cam_model import PostCam, PostCamSchema
-from app.services.vehicle_service import VehicleService
+from app import app
+from app.services.post_cam_service import PostService as service
 
 @app.route('/api/v1/cam/post')
 def index_cam_post():
@@ -9,23 +8,21 @@ def index_cam_post():
 
 @app.route('/api/v1/cam/posts', methods=['GET'])
 def get_cam_posts():
-    posts = PostCam.query.order_by(PostCam.id.asc()).all()
+    posts = service.get_post_list()
     if not posts:
         abort(404)
     
-    post_schema = PostCamSchema()
-    return json.dumps([post_schema.dump(post) for post in posts])
+    return jsonify(posts), 200
 
 @app.route('/api/v1/cam/post/<int:post_id>', methods=['GET'])
 def get_cam_post(post_id):
-    post = PostCam.query.filter(PostCam.id==cam_id).order_by(PostCam.timestamp.asc()).all()
-    if not cam:
-        return jsonify("nenhum post encontrado com esse id"), 204
+    post = service.get_post_to_id(post_id)
+    if not post:
+        abort(404)
 
-    post_schema = PostCamSchema()
-    return json.dumps(post_schema.dump(post)), 200
+    return jsonify(post), 200
 
-''' json model
+''' json model to create_cam_post()
     {
         "info": "",
         "cam_id": "",
@@ -47,51 +44,44 @@ def create_cam_post():
     cam_id = request.json['cam_id']
     placa = request.json['placa']
     
-    vehicle_id = VehicleService.get_vehicle_id(placa)
-    if not vehicle_id:
-        return jsonify({"Erro: placa error"}), 400
-
-    post = PostCam(info, cam_id, vehicle_id)
-
-    db.session.add(post)
-    db.session.commit()
-    
-    post_schema = PostCamSchema()
-    return json.dumps(post_schema.dump(post)), 201
+    post = service.set_post(info, cam_id, placa)
+    if post == "cam_error":
+        return jsonify("Erro: cam_id error"), 400
+    if post == "vehicle_error":
+        return jsonify("Erro: vehicle error"), 400
+    return jsonify(post), 201
 
 @app.route('/api/v1/cam/post/<int:post_id>', methods=['DELETE'])
 def delete_cam_post(post_id):
-    post = PostCam.query.filter(PostCam.id==post_id).first()
+    post = service.delete_post(post_id)
     if not post:
-        return jsonify("nenhum post_cam encontrado com esse id"), 204
+        abort(404)
 
-    db.session.delete(post)
-    db.session.commit()
+    return jsonify(post), 200
 
-    post_schema = PostCamSchema()
-    return json.dumps(post_schema.dump(post)), 200
-
-@app.route('/api/v1/cam/post/<int:cam_id>', methods=['PUT'])
+''' json model to put_cam_post(post_id: int)
+    {
+        "info": "" or null,
+        "cam_id": "" or null,
+        "placa": "" or null
+    }
+    '''
+@app.route('/api/v1/cam/post/<int:post_id>', methods=['PUT'])
 def put_cam_post(post_id):
-    post = PostCam.query.filter(PostCam.id==post_id).first()
-    if not post:
-        return jsonify("nenhum post_cam encontrado com esse id"), 204
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400
-    
-    if request.json['info']:
-        cam.info = request.json['info']
-    if request.json['cam_id']:
-        cam.cam_id = request.json['cam_id']
-    if request.json['vehicle_id']:
-        cam.vehicle_id = request.json['vehicle_id']
+    post = service.put_post(post_id, request.get_json())
+    if post is False:
+        abort(403)
+    if not post:
+        abort(404)
 
-    db.session.add(post)
-    db.session.commit()
-
-    post_schema = PostCamSchema()
-    return json.dumps(post_schema.dump(post)), 200
+    return jsonify(post), 200
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found (404)'}), 404)
+
+@app.errorhandler(403)
+def not_found(error):
+    return make_response(jsonify({'error': 'Placa or Cam Not found (403)'}), 403)

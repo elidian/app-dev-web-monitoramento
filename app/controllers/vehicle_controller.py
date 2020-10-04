@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, make_response, request, abort
-from app import app, db
-from app.models.vehicle_model import Vehicle, VehicleSchema
+from app import app
+from app.services.vehicle_service import VehicleService as service
 
 @app.route('/api/v1/vehicle')
 def index_vehicle():
@@ -8,36 +8,42 @@ def index_vehicle():
 
 @app.route('/api/v1/vehicles', methods=['GET'])
 def get_vehicles():
-    vehicles = Vehicle.query.order_by(Vehicle.id.asc()).all()
+    vehicles = service.get_vehicle_list()
     if not vehicles:
         abort(404)
+    return jsonify(vehicles)
     
-    vehicle_schema = VehicleSchema()
-    return json.dumps([vehicle_schema.dump(vehicle) for vehicle in vehicles])
+    
 
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['GET'])
 def get_vehicle(vehicle_id):
-    vehicle = Vehicle.query.filter(Vehicle.id==vehicle_id).first()
+    vehicle = service.get_vehicle_to_id(vehicle_id)
     if not vehicle:
-        return jsonify("nenhuma Vehicle encontrado com esse id"), 204
+        abort(404)
 
-    vehicle_schema = VehicleSchema()
-    return json.dumps(vehicle_schema.dump(vehicle)), 200
+    return jsonify(vehicle)
+
+@app.route('/api/v1/vehicle/placa/<string:placa>', methods=['GET'])
+def get_vehicle_to_placa(placa):
+    vehicle = service.get_vehicle_to_placa(placa)
+    if not vehicle:
+        abort(404)
+
+    return jsonify(vehicle)
 
 ''' json model
     {
-        "placa": "",
-        "chassi": "",
-        "cpf_dono": "",
-        "queixa_roubo": "",
-        "licenciamento": "",
-        "exercicio": "",
-        "ipva": ""
+        "placa": "PLA2020",
+        "chassi": "321654987321",
+        "cpf_dono": "12345678999",
+        "queixa_roubo": false or true,
+        "licenciamento": false or true,
+        "exercicio": "2020",
+        "ipva": false or true
     }
     '''
 @app.route('/api/v1/vehicle/new', methods=['POST'])
 def create_vehicle():
-    #'''
     if not request.get_json():
         return jsonify("Requisição incompleta (json)"), 400
     
@@ -55,7 +61,7 @@ def create_vehicle():
         return jsonify("Requisição incompleta (exercicio)"), 400
     if not json.dumps(request.json['ipva']):
         return jsonify("Requisição incompleta (ipva)"), 400
-    #'''
+    
     placa = request.json['placa']
     chassi = request.json['chassi']
     cpf_dono = request.json['cpf_dono']
@@ -64,54 +70,39 @@ def create_vehicle():
     exercicio = request.json['exercicio']
     ipva = request.json['ipva']
     
-    vehicle = Vehicle(placa, chassi, cpf_dono, queixa_roubo, licenciamento, exercicio, ipva)
+    vehicle = service.set_vehicle(placa, chassi, cpf_dono, queixa_roubo, licenciamento, exercicio, ipva)
 
-    db.session.add(vehicle)
-    db.session.commit()
-    
-    vehicle_schema = VehicleSchema()
-    return json.dumps(vehicle_schema.dump(vehicle)), 201
+    return jsonify(vehicle), 201
 
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['DELETE'])
 def delete_vehicle(vehicle_id):
-    vehicle = Vehicle.query.filter(Vehicle.id==vehicle_id).first()
+    vehicle = service.delete_vehicle(vehicle_id)
     if not vehicle:
-        return jsonify("nenhum Vehicle encontrado com esse id"), 204
+        abort(404)
 
-    db.session.delete(vehicle)
-    db.session.commit()
-    vehicle_schema = VehicleSchema()
-    return json.dumps(vehicle_schema.dump(vehicle)), 200
+    return jsonify(vehicle), 200
 
+''' json model
+    {
+        "placa": "" or null,
+        "chassi": "" or null,
+        "cpf_dono": "" or null,
+        "queixa_roubo": false or true or null,
+        "licenciamento": false or true or null,
+        "exercicio": "" or null,
+        "ipva": false or true or null
+    }
+    '''
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['PUT'])
 def put_vehicle(vehicle_id):
-    vehicle = Vehicle.query.filter(Vehicle.id==vehicle_id).first()
-    if not vehicle:
-        return jsonify("nenhum Vehicle encontrado com esse id"), 204
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400
+    vehicle = service.put_vehicle(vehicle_id, request.get_json())
+    if not vehicle:
+        abort(404)
     
-    if request.json['placa']:
-        vehicle.placa = request.json['placa']
-    if request.json['chassi']:
-        vehicle.chassi = request.json['chassi']
-    if request.json['cpf_dono']:
-        vehicle.cpf_dono = request.json['cpf_dono']
-    if request.json['queixa_roubo']:
-        vehicle.queixa_roubo = request.json['queixa_roubo']
-    if request.json['licenciamento']:
-        vehicle.licenciamento = request.json['licenciamento']
-    if request.json['exercicio']:
-        vehicle.exercicio = request.json['exercicio']
-    if request.json['ipva']:
-        vehicle.ipva = request.json['ipva']
-
-    db.session.add(vehicle)
-    db.session.commit()
-    
-    vehicle_schema = VehicleSchema()
-    return json.dumps(Vehicle_schema.dump(vehicle)), 200
+    return jsonify(vehicle), 200
 
 @app.errorhandler(404)
-def not_found(error):
+def not_found_404(error):
     return make_response(jsonify({'error': 'Not found (404)'}), 404)

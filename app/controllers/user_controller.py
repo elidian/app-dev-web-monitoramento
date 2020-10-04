@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, make_response, request, abort
-from app import app, db
-from app.models.user_model import User, UserSchema
+from app import app
+from app.services.user_service import UserService as service
 
 @app.route('/api/v1/user')
 def index_user():
@@ -8,25 +8,32 @@ def index_user():
 
 @app.route('/api/v1/users', methods=['GET'])
 def get_users():
-    users = User.query.order_by(User.id.asc()).all()
+    users = service.get_user_list()
     if not users:
         abort(404)
     
-    user_schema = UserSchema()
-    return json.dumps([user_schema.dump(user) for user in users])
+    return jsonify(users), 200
 
 @app.route('/api/v1/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.query.filter(User.id==user_id).first()
+    user = service.get_user_to_id(user_id)
     if not user:
-        return jsonify("nenhum user encontrado com esse id"), 204
+        abort(404)
 
-    user_schema = UserSchema()
-    return json.dumps(user_schema.dump(user)), 200
+    return jsonify(user), 200
+
+@app.route('/api/v1/user/cpf/<string:cpf>', methods=['GET'])
+def get_user_to_cpf(cpf):
+    user = service.get_user_to_cpf(cpf)
+    if not user:
+        abort(404)
+
+    return jsonify(user), 200
 
 ''' json model
     {
         "username": "",
+        "cpf": "",
         "email": "",
         "password": ""
     }
@@ -34,50 +41,45 @@ def get_user(user_id):
 @app.route('/api/v1/user/new', methods=['POST'])
 def create_user():
     username = request.json['username']
+    cpf = request.json['cpf']
     email = request.json['email']
     password = request.json['password']
-    user = User(username, email, password)
+    user = service.set_user(username, cpf, email, password)
 
-    db.session.add(user)
-    db.session.commit()
-    
-    user_schema = UserSchema()
-    return json.dumps(user_schema.dump(user)), 201
+    return jsonify(user), 201
 
 @app.route('/api/v1/user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    user = User.query.filter(User.id==user_id).first()
+    user = service.delete_user(user_id)
     if not user:
-        return jsonify("nenhum user encontrado com esse id"), 204
+        abort(404)
 
-    db.session.delete(user)
-    db.session.commit()
-    user_schema = UserSchema()
-    return json.dumps(user_schema.dump(user)), 200
+    return jsonify(user), 200
 
+''' json model to put_user(user_id)
+    {
+        "username": "" or null,
+        "cpf": "" or null,
+        "email": "" or null,
+        "password": "" or null,
+        "password_old": "" or null
+    }
+    '''
 @app.route('/api/v1/user/<int:user_id>', methods=['PUT'])
 def put_user(user_id):
-    user = User.query.filter(User.id==user_id).first()
-    if not user:
-        return jsonify("nenhum user encontrado com esse id"), 204
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400
-    
-    if request.json['username']:
-        user.username = request.json['username']
-    if request.json['email']:
-        user.email = request.json['email']
-    if request.json['senha']:
-        user.senha = request.json['senha']
-
-    db.session.add(user)
-    db.session.commit()
-    
-    user_schema = UserSchema()
-    return json.dumps(user_schema.dump(user)), 200
+    user = service.put_user(user_id, request.get_json())
+    if user is False:
+        abort(403)
+    if not user:
+        abort(404)
+    return jsonify(user), 200
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error 404': 'Not found'}), 404)
 
-
+@app.errorhandler(403)
+def not_found(error):
+    return make_response(jsonify({'error 403': 'CPF nao permitido'}), 403)

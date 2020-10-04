@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, make_response, request, abort
-from app import app, db
-from app.models.cam_model import Cam, CamSchema
+from app import app
+from app.services.cam_service import CamService as service
 
 @app.route('/api/v1/cam')
 def index_cam():
@@ -8,23 +8,29 @@ def index_cam():
 
 @app.route('/api/v1/cams', methods=['GET'])
 def get_cams():
-    cams = Cam.query.order_by(Cam.id.asc()).all()
+    cams = service.get_cam_list()
     if not cams:
         abort(404)
     
-    cam_schema = CamSchema()
-    return json.dumps([cam_schema.dump(cam) for cam in cams])
+    return jsonify(cams), 200
 
 @app.route('/api/v1/cam/<int:cam_id>', methods=['GET'])
 def get_cam(cam_id):
-    cam = Cam.query.filter(Cam.id==cam_id).first()
+    cam = service.get_cam_to_id(cam_id)
     if not cam:
-        return jsonify("nenhuma CAM encontrado com esse id"), 204
+        abort(404)
 
-    cam_schema = CamSchema()
-    return json.dumps(cam_schema.dump(cam)), 200
+    return jsonify(cam), 200
 
-''' json model
+@app.route('/api/v1/user/cpf/<string:name>', methods=['GET'])
+def get_user_to_name(name):
+    cam = service.get_user_to_name(name)
+    if not cam:
+        abort(404)
+
+    return jsonify(cam), 200
+
+''' json model to create_cam()
     {
         "camname": "",
         "end": "",
@@ -36,46 +42,41 @@ def create_cam():
     camname = request.json['camname']
     end = request.json['end']
     password = request.json['password']
-    cam = Cam(camname, end, password)
+    cam = service.set_cam(camname, end, password)
 
-    db.session.add(cam)
-    db.session.commit()
-    
-    cam_schema = CamSchema()
-    return json.dumps(cam_schema.dump(cam)), 201
+    return jsonify(cam), 201
 
 @app.route('/api/v1/cam/<int:cam_id>', methods=['DELETE'])
 def delete_cam(cam_id):
-    cam = Cam.query.filter(Cam.id==cam_id).first()
+    cam = service.delete_cam(cam_id)
     if not cam:
-        return jsonify("nenhum cam encontrado com esse id"), 204
+        abort(404)
 
-    db.session.delete(cam)
-    db.session.commit()
-    cam_schema = CamSchema()
-    return json.dumps(cam_schema.dump(cam)), 200
+    return jsonify(cam), 200
 
+''' json model to put_cam(cam_id)
+    {
+        "camname": "" or null,
+        "email": "" or null,
+        "password": "" or null,
+        "password_old": "" or null
+    }
+    '''
 @app.route('/api/v1/cam/<int:cam_id>', methods=['PUT'])
 def put_cam(cam_id):
-    cam = Cam.query.filter(Cam.id==cam_id).first()
-    if not cam:
-        return jsonify("nenhum Cam encontrado com esse id"), 204
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400
-    
-    if request.json['camname']:
-        cam.camname = request.json['camname']
-    if request.json['end']:
-        cam.end = request.json['end']
-    if request.json['password']:
-        cam.senha = request.json['password']
-
-    db.session.add(cam)
-    db.session.commit()
-    
-    cam_schema = CamSchema()
-    return json.dumps(cam_schema.dump(cam)), 200
+    cam = service.put_cam(cam_id, request.get_json())
+    if cam is False:
+        abort(404)
+    if not cam:
+        abort(404)
+    return jsonify(cam), 200
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error 404': 'Not found'}), 404)
+
+@app.errorhandler(403)
+def not_found(error):
+    return make_response(jsonify({'error 403': 'camname nao permitido'}), 403)

@@ -16,5 +16,5 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
-from app import controllers, models
+from app import controllers, models, services, old_routes
 from .controllers import user_controller, cam_controller, vehicle_controller, post_user_controller, post_cam_controller

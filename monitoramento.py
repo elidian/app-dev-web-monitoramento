@@ -1,5 +1,4 @@
 from app import app, db
-#from app.old_models import PostAgent, PostCam, UserAgent, UserCam
 from app.models.user_model import User
 from app.models.cam_model import Cam
 from app.models.post_cam_model import PostCam

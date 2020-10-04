@@ -21,6 +21,13 @@
             {% endfor %}
         </p>
         <p>
+            {{ form.cpf.label }}<br>
+            {{ form.cpf(size=15) }}<br>
+            {% for error in form.cpf.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
             {{ form.password.label }}<br>
             {{ form.password(size=32) }}<br>
             {% for error in form.password.errors %}

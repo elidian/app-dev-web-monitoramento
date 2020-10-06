@@ -27,7 +27,8 @@ class PostService:
         vehicle = VehicleService.get_vehicle_to_placa(placa)
         if not vehicle:
             return "vehicle_error"
-        post = PostCam(info, cam_id, vehicle['id'])
+        name = CamService.get_cam_name(cam_id)
+        post = PostCam(info, cam_id, name, vehicle['id'], placa)
         db.session.add(post)
         db.session.commit()
         post_schema = PostCamSchema()
@@ -56,11 +57,13 @@ class PostService:
             if not CamService.get_cam_to_id(jsonn['cam_id']):
                 return False
             post.cam_id = jsonn['cam_id']
+            post.name = CamService.get_cam_name(cam_id)
         if jsonn['placa']:
             vehicle = VehicleService.get_vehicle_to_placa(jsonn['placa'])
             if not vehicle:
                 return False
             post.vehicle_id = vehicle['id']
+            post.placa = vehicle['placa']
 
         db.session.add(post)
         db.session.commit()

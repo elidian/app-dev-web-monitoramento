@@ -9,13 +9,22 @@ class UserService:
         return [user_schema.dump(user) for user in users]
     
     @staticmethod
-    def get_user_to_id(user_id):
-        user = User.query.filter(User.id==user_id).first()
+    def get_user_to_id(id):
+        user = User.query.filter(User.id==id).first()
         user_schema = UserSchema()
         return user_schema.dump(user)
     
     @staticmethod
-    def get_user_to_placa(cpf):
+    def get_user_to_name(name):
+        return User.query.filter(User.name==name).first()
+
+    @staticmethod
+    def get_user_name(id):
+        user = User.query.filter(User.id==id).first()
+        return user.name
+    
+    @staticmethod
+    def get_user_to_cpf(cpf):
         user = User.query.filter(User.cpf==cpf).first()
         if not user:
             return False
@@ -23,16 +32,16 @@ class UserService:
         return user_schema.dump(user)
     
     @staticmethod
-    def set_user(username, email, password):
-        user = User(username, email, password)
+    def set_user(name, email, password):
+        user = User(name, email, password)
         db.session.add(user)
         db.session.commit()
         user_schema = UserSchema()
         return user_schema.dump(user)
     
     @staticmethod
-    def delete_user(user_id):
-        user = User.query.filter(User.id==user_id).first()
+    def delete_user(id):
+        user = User.query.filter(User.id==id).first()
         if not user:
             return False
 
@@ -42,13 +51,13 @@ class UserService:
         return user_schema.dump(user)
     
     @staticmethod
-    def put_user(user_id, jsonn):
-        user = User.query.filter(User.id==user_id).first()
+    def put_user(id, jsonn):
+        user = User.query.filter(User.id==id).first()
         if not user:
             return False
 
-        if jsonn['username']:
-            user.username = jsonn['username']
+        if jsonn['name']:
+            user.name = jsonn['name']
         if jsonn['cpf']:
             if User.query.filter(User.cpf==jsonn['cpf']).first():
                 return False

@@ -1,5 +1,14 @@
 BACKEND DE API DE MONITORAMENTO
 
+Descrição:
+Projeto Backend desenvolvido na disciplina de Desenvolvimento Web 2020.1.
+O projeto tem como objetivo criar um banco de dados permitindo interações expecificas entre usuarios e o banco.
+
+Objeto-relacional SQL (ORM):
+O banco utilizado é o SQLite atraves do SQLAlchemy (flask_sqlalchemy) e do Migrate (flask_migrate)
+
+
+
 tutorial utilizado na construção da api:
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
 

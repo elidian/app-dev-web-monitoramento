@@ -15,6 +15,11 @@ class VehicleService:
         return vehicle_schema.dump(vehicle)
 
     @staticmethod
+    def get_vehicle_placa(vehicle_id):
+        vehicle = Vehicle.query.filter(Vehicle.id==vehicle_id).first()
+        return vehicle.placa
+
+    @staticmethod
     def get_vehicle_to_placa(placa):
         if not Vehicle.check_is_placa(placa):
             return False

@@ -1,5 +1,7 @@
 from app import app, db
 from datetime import datetime
+from app.models.post_user_model import PostUser
+from app.models.post_cam_model import PostCam
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 class Vehicle(db.Model):
@@ -12,6 +14,8 @@ class Vehicle(db.Model):
     licenciamento = db.Column(db.Boolean)
     exercicio = db.Column(db.String)
     ipva = db.Column(db.Boolean)
+    posts_user = db.relationship('PostUser', backref='vehicle', lazy='dynamic')
+    posts_cam = db.relationship('PostCam', backref='vehicle', lazy='dynamic')
 
     def __repr__(self):
         return '<id: {}, Vehicle Placa: {}; Chassi: {}; Cpf registrado: {}; Queixa de ROUBO: {}; Licenciamento: {}; Exercicio: {}; ipva: {}>'.format(self.id, self.placa, self.chassi, self.cpf_dono, self.queixa_roubo, self.licenciamento, self.exercicio, self.ipva)
@@ -44,3 +48,5 @@ class VehicleSchema(SQLAlchemySchema):
     licenciamento = auto_field()
     exercicio = auto_field()
     ipva = auto_field()
+    posts_user = auto_field()
+    posts_cam = auto_field()

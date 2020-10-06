@@ -1,12 +1,14 @@
 from flask import Flask, json, jsonify, make_response, request, abort
 from app import app
 from app.services.post_cam_service import PostService as service
+from flask_login import login_required
 
 @app.route('/api/v1/cam/post')
 def index_cam_post():
-    return jsonify("Hi post, Welcome to Monitoramento API in Flask!")
+    return jsonify("Hi cam post, Welcome to Monitoramento API in Flask!")
 
 @app.route('/api/v1/cam/posts', methods=['GET'])
+#@login_required
 def get_cam_posts():
     posts = service.get_post_list()
     if not posts:
@@ -15,6 +17,7 @@ def get_cam_posts():
     return jsonify(posts), 200
 
 @app.route('/api/v1/cam/post/<int:post_id>', methods=['GET'])
+#@login_required
 def get_cam_post(post_id):
     post = service.get_post_to_id(post_id)
     if not post:
@@ -30,6 +33,7 @@ def get_cam_post(post_id):
     }
     '''
 @app.route('/api/v1/cam/post/new', methods=['POST'])
+#@login_required
 def create_cam_post():
     if not request.get_json():
         return jsonify("Requisição incompleta (json)"), 400
@@ -52,6 +56,7 @@ def create_cam_post():
     return jsonify(post), 201
 
 @app.route('/api/v1/cam/post/<int:post_id>', methods=['DELETE'])
+#@login_required
 def delete_cam_post(post_id):
     post = service.delete_post(post_id)
     if not post:
@@ -67,6 +72,7 @@ def delete_cam_post(post_id):
     }
     '''
 @app.route('/api/v1/cam/post/<int:post_id>', methods=['PUT'])
+#@login_required
 def put_cam_post(post_id):
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400

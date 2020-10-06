@@ -22,12 +22,13 @@ class PostService:
     
     @staticmethod
     def set_post(info, user_id, placa):
-        if not UserService.get_cam_to_id(user_id):
+        if not UserService.get_user_to_id(user_id):
             return "user_error"
         vehicle = VehicleService.get_vehicle_to_placa(placa)
         if not vehicle:
             return "vehicle_error"
-        post = PostUser(info, user_id, vehicle['id'])
+        name = UserService.get_user_name(user_id)
+        post = PostUser(info, user_id, name, vehicle['id'], placa)
         db.session.add(post)
         db.session.commit()
         post_schema = PostUserSchema()
@@ -56,11 +57,13 @@ class PostService:
             if not UserService.get_user_to_id(jsonn['user_id']):
                 return False
             post.user_id = jsonn['user_id']
+            post.name = UserService.get_user_name(user_id)
         if jsonn['placa']:
             vehicle = VehicleService.get_vehicle_to_placa(jsonn['placa'])
             if not vehicle:
                 return False
             post.vehicle_id = vehicle['id']
+            post.placa = vehicle['placa']
 
         db.session.add(post)
         db.session.commit()

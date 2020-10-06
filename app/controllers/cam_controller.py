@@ -1,12 +1,14 @@
 from flask import Flask, json, jsonify, make_response, request, abort
 from app import app
 from app.services.cam_service import CamService as service
+from flask_login import login_required
 
 @app.route('/api/v1/cam')
 def index_cam():
     return jsonify("Hi Cam, Welcome to Monitoramento API in Flask!")
 
 @app.route('/api/v1/cams', methods=['GET'])
+#@login_required
 def get_cams():
     cams = service.get_cam_list()
     if not cams:
@@ -15,6 +17,7 @@ def get_cams():
     return jsonify(cams), 200
 
 @app.route('/api/v1/cam/<int:cam_id>', methods=['GET'])
+#@login_required
 def get_cam(cam_id):
     cam = service.get_cam_to_id(cam_id)
     if not cam:
@@ -23,6 +26,7 @@ def get_cam(cam_id):
     return jsonify(cam), 200
 
 @app.route('/api/v1/user/cpf/<string:name>', methods=['GET'])
+#@login_required
 def get_user_to_name(name):
     cam = service.get_user_to_name(name)
     if not cam:
@@ -38,6 +42,7 @@ def get_user_to_name(name):
     }
     '''
 @app.route('/api/v1/cam/new', methods=['POST'])
+#@login_required
 def create_cam():
     camname = request.json['camname']
     end = request.json['end']
@@ -47,6 +52,7 @@ def create_cam():
     return jsonify(cam), 201
 
 @app.route('/api/v1/cam/<int:cam_id>', methods=['DELETE'])
+#@login_required
 def delete_cam(cam_id):
     cam = service.delete_cam(cam_id)
     if not cam:
@@ -63,6 +69,7 @@ def delete_cam(cam_id):
     }
     '''
 @app.route('/api/v1/cam/<int:cam_id>', methods=['PUT'])
+#@login_required
 def put_cam(cam_id):
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400

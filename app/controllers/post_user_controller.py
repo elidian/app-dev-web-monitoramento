@@ -1,12 +1,14 @@
 from flask import Flask, json, jsonify, make_response, request, abort
 from app import app
 from app.services.post_user_service import PostService as service
+from flask_login import login_required
 
 @app.route('/api/v1/user/post')
 def index_user_post():
-    return jsonify("Hi post, Welcome to Monitoramento API in Flask!")
+    return jsonify("Hi user post, Welcome to Monitoramento API in Flask!")
 
 @app.route('/api/v1/user/posts', methods=['GET'])
+#@login_required
 def get_user_posts():
     posts = service.get_post_list()
     if not posts:
@@ -15,6 +17,7 @@ def get_user_posts():
     return jsonify(posts), 200
 
 @app.route('/api/v1/user/post/<int:post_id>', methods=['GET'])
+#@login_required
 def get_user_post(post_id):
     post = service.get_post_to_id(post_id)
     if not post:
@@ -30,6 +33,7 @@ def get_user_post(post_id):
     }
     '''
 @app.route('/api/v1/user/post/new', methods=['POST'])
+#@login_required
 def create_user_post():
     if not request.get_json():
         return jsonify("Requisição incompleta (json)"), 400
@@ -52,6 +56,7 @@ def create_user_post():
     return jsonify(post), 201
 
 @app.route('/api/v1/user/post/<int:post_id>', methods=['DELETE'])
+#@login_required
 def delete_user_post(post_id):
     post = service.delete_post(post_id)
     if not post:
@@ -67,6 +72,7 @@ def delete_user_post(post_id):
     }
     '''
 @app.route('/api/v1/user/post/<int:post_id>', methods=['PUT'])
+#@login_required
 def put_user_post(post_id):
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400

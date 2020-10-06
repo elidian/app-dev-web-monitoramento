@@ -1,12 +1,14 @@
 from flask import Flask, json, jsonify, make_response, request, abort
 from app import app
 from app.services.vehicle_service import VehicleService as service
+from flask_login import login_required
 
 @app.route('/api/v1/vehicle')
 def index_vehicle():
     return jsonify("Hi Vehicle, Welcome to Monitoramento API in Flask!")
 
 @app.route('/api/v1/vehicles', methods=['GET'])
+#@login_required
 def get_vehicles():
     vehicles = service.get_vehicle_list()
     if not vehicles:
@@ -16,6 +18,7 @@ def get_vehicles():
     
 
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['GET'])
+#@login_required
 def get_vehicle(vehicle_id):
     vehicle = service.get_vehicle_to_id(vehicle_id)
     if not vehicle:
@@ -24,6 +27,7 @@ def get_vehicle(vehicle_id):
     return jsonify(vehicle)
 
 @app.route('/api/v1/vehicle/placa/<string:placa>', methods=['GET'])
+#@login_required
 def get_vehicle_to_placa(placa):
     vehicle = service.get_vehicle_to_placa(placa)
     if not vehicle:
@@ -43,6 +47,7 @@ def get_vehicle_to_placa(placa):
     }
     '''
 @app.route('/api/v1/vehicle/new', methods=['POST'])
+#@login_required
 def create_vehicle():
     if not request.get_json():
         return jsonify("Requisição incompleta (json)"), 400
@@ -75,6 +80,7 @@ def create_vehicle():
     return jsonify(vehicle), 201
 
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['DELETE'])
+#@login_required
 def delete_vehicle(vehicle_id):
     vehicle = service.delete_vehicle(vehicle_id)
     if not vehicle:
@@ -94,6 +100,7 @@ def delete_vehicle(vehicle_id):
     }
     '''
 @app.route('/api/v1/vehicle/<int:vehicle_id>', methods=['PUT'])
+#@login_required
 def put_vehicle(vehicle_id):
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400

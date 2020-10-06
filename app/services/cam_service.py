@@ -1,4 +1,5 @@
 from app import db
+from flask import json
 from app.models.cam_model import Cam, CamSchema
 
 class CamService:   
@@ -15,16 +16,25 @@ class CamService:
         return cam_schema.dump(cam)
     
     @staticmethod
-    def get_cam_to_name(camname):
-        cam = Cam.query.filter(Cam.camname==camname).first()
+    def get_cam_to_name(name):
+        return Cam.query.filter(Cam.name==name).first()
+
+    @staticmethod
+    def get_cam_name(cam_id):
+        cam = Cam.query.filter(Cam.id==cam_id).first()
+        return cam.name
+
+    @staticmethod
+    def get_cam_to_name(name):
+        cam = Cam.query.filter(Cam.name==name).first()
         if not cam:
             return False
         cam_schema = CamSchema()
         return cam_schema.dump(cam)
     
     @staticmethod
-    def set_cam(camname, email, password):
-        cam = Cam(camname, email, password)
+    def set_cam(name, email, password):
+        cam = Cam(name, email, password)
         db.session.add(cam)
         db.session.commit()
         cam_schema = CamSchema()
@@ -47,10 +57,10 @@ class CamService:
         if not cam:
             return False
 
-        if jsonn['camname']:
-            if Cam.query.filter(Cam.camname==jsonn['camname']).first():
+        if jsonn['name']:
+            if Cam.query.filter(Cam.name==jsonn['name']).first():
                 return False
-            Cam.camname = jsonn['camname']
+            Cam.name = jsonn['name']
         if jsonn['email']:
             Cam.email = jsonn['email']
         if jsonn['password']:

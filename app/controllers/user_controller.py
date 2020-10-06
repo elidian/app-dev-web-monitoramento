@@ -1,12 +1,14 @@
 from flask import Flask, json, jsonify, make_response, request, abort
 from app import app
 from app.services.user_service import UserService as service
+from flask_login import login_required
 
 @app.route('/api/v1/user')
 def index_user():
     return jsonify("Hi User, Welcome to Monitoramento API in Flask!")
 
 @app.route('/api/v1/users', methods=['GET'])
+#@login_required
 def get_users():
     users = service.get_user_list()
     if not users:
@@ -15,6 +17,7 @@ def get_users():
     return jsonify(users), 200
 
 @app.route('/api/v1/user/<int:user_id>', methods=['GET'])
+#@login_required
 def get_user(user_id):
     user = service.get_user_to_id(user_id)
     if not user:
@@ -23,6 +26,7 @@ def get_user(user_id):
     return jsonify(user), 200
 
 @app.route('/api/v1/user/cpf/<string:cpf>', methods=['GET'])
+#@login_required
 def get_user_to_cpf(cpf):
     user = service.get_user_to_cpf(cpf)
     if not user:
@@ -39,6 +43,7 @@ def get_user_to_cpf(cpf):
     }
     '''
 @app.route('/api/v1/user/new', methods=['POST'])
+#@login_required
 def create_user():
     username = request.json['username']
     cpf = request.json['cpf']
@@ -49,6 +54,7 @@ def create_user():
     return jsonify(user), 201
 
 @app.route('/api/v1/user/<int:user_id>', methods=['DELETE'])
+#@login_required
 def delete_user(user_id):
     user = service.delete_user(user_id)
     if not user:
@@ -66,6 +72,7 @@ def delete_user(user_id):
     }
     '''
 @app.route('/api/v1/user/<int:user_id>', methods=['PUT'])
+#@login_required
 def put_user(user_id):
     if not request.get_json():
         return jsonify("Requisição incompleta"), 400

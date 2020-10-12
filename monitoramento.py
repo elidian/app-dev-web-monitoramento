@@ -4,7 +4,7 @@ from app.models.cam_model import Cam
 from app.models.post_cam_model import PostCam
 from app.models.post_user_model import PostUser
 from app.models.vehicle_model import Vehicle
-#from app.models import user_loader
+from app.models import user_loader
 '''
 @app.shell_context_processor
 def make_shell_context():

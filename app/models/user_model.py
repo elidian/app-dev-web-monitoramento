@@ -31,7 +31,7 @@ class UserSchema(SQLAlchemySchema):
     email = auto_field()
     account_type = auto_field()
     posts = auto_field()
-
+'''
 from app import login
 from app.models.cam_model import Cam
 from app.models.user_model import User
@@ -46,3 +46,4 @@ def load_user(id):
     else:
         print ('erro')
         return None
+'''
